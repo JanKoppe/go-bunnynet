@@ -62,120 +62,65 @@ type VideoLibrary struct {
 	Bitrate2160p                     int
 }
 
-func (c *Client) ListVideoLibraries() ([]VideoLibrary, error) {
-	req, err := c.newRequest("GET", "/videolibrary", "", nil)
-	if err != nil {
-		return []VideoLibrary{}, err
-	}
-
+func (c *Client) ListVideoLibraries() (*[]VideoLibrary, error) {
 	var videoLibrary []VideoLibrary
-	_, err = c.do(req, &videoLibrary)
-	return videoLibrary, err
+	return &videoLibrary, c.doRequest("GET", "/videolibrary", "", nil, &videoLibrary)
 }
 
-func (c *Client) GetVideoLibrary(libraryID int64) (VideoLibrary, error) {
-	req, err := c.newRequest("GET", fmt.Sprintf("/videlibrary/%v", libraryID), "", nil)
-	if err != nil {
-		return VideoLibrary{}, err
-	}
-
+func (c *Client) GetVideoLibrary(libraryID int64) (*VideoLibrary, error) {
 	var videoLibrary VideoLibrary
-	_, err = c.do(req, &videoLibrary)
-	return videoLibrary, err
+	return &videoLibrary, c.doRequest("GET", fmt.Sprintf("/videolibrary/%v", libraryID), "", nil, &videoLibrary)
 }
 
-func (c *Client) AddVideoLibrary(library VideoLibrary) (VideoLibrary, error) {
-
-	// null non-settable fields so they get omitted
-	library.ID = 0
-	library.VideoCount = 0
-	library.DateCreated = BunnyTime{}
-
-	req, err := c.newRequest("POST", "/videolibrary", "", library)
-	if err != nil {
-		return VideoLibrary{}, err
+func (c *Client) AddVideoLibrary(name string, replicationRegions []string) (*VideoLibrary, error) {
+	opts := map[string]interface{}{
+		"Name":               name,
+		"ReplicationRegions": replicationRegions,
 	}
-
 	var videoLibrary VideoLibrary
-	_, err = c.do(req, &videoLibrary)
-	return videoLibrary, err
+	return &videoLibrary, c.doRequest("POST", "/videolibrary", "", opts, &videoLibrary)
 }
 
-func (c *Client) UpdateVideoLibrary(library VideoLibrary) error {
+func (c *Client) UpdateVideoLibrary(library VideoLibrary) (*VideoLibrary, error) {
 	libraryID := library.ID
 
 	// null non-settable fields so they get omitted in marshal
 	library.ID = 0
 	library.VideoCount = 0
 	library.DateCreated = BunnyTime{}
-
-	req, err := c.newRequest("POST", fmt.Sprintf("/videolibrary/%v", libraryID), "", library)
-	if err != nil {
-		return err
-	}
-
-	_, err = c.do(req, nil)
-	return err
+	var videoLibrary VideoLibrary
+	return &videoLibrary, c.doRequest("POST", fmt.Sprintf("/videolibrary/%v", libraryID), "", library, &videoLibrary)
 }
 
 func (c *Client) DeleteVideoLibrary(libraryID int64) error {
-	req, err := c.newRequest("DELETE", fmt.Sprintf("/videolibrary/%v", libraryID), "", nil)
-	if err != nil {
-		return err
-	}
-
-	_, err = c.do(req, nil)
-	return err
+	return c.doRequest("DELETE", fmt.Sprintf("/videolibrary/%v", libraryID), "", nil, nil)
 }
 
 func (c *Client) AddVideoLibraryAllowedReferrer(libraryID int64, hostname string) error {
 	opts := map[string]string{
 		"Hostname": hostname,
 	}
-	req, err := c.newRequest("POST", fmt.Sprintf("/videolibrary/%v/addAllowedReferrer", libraryID), "", opts)
-	if err != nil {
-		return err
-	}
-
-	_, err = c.do(req, nil)
-	return err
+	return c.doRequest("POST", fmt.Sprintf("/videolibrary/%v/addAllowedReferrer", libraryID), "", opts, nil)
 }
 
 func (c *Client) RemoveVideoLibraryAllowedReferrer(libraryID int64, hostname string) error {
 	opts := map[string]string{
 		"Hostname": hostname,
 	}
-	req, err := c.newRequest("POST", fmt.Sprintf("/videolibrary/%v/removeAllowedReferrer", libraryID), "", opts)
-	if err != nil {
-		return err
-	}
-
-	_, err = c.do(req, nil)
-	return err
+	return c.doRequest("POST", fmt.Sprintf("/videolibrary/%v/removeAllowedReferrer", libraryID), "", opts, nil)
 }
 
 func (c *Client) AddVideoLibraryBlockedReferrer(libraryID int64, hostname string) error {
 	opts := map[string]string{
 		"Hostname": hostname,
 	}
-	req, err := c.newRequest("POST", fmt.Sprintf("/videolibrary/%v/addBlockedReferrer", libraryID), "", opts)
-	if err != nil {
-		return err
-	}
+	return c.doRequest("POST", fmt.Sprintf("/videolibrary/%v/addBlockedReferrer", libraryID), "", opts, nil)
 
-	_, err = c.do(req, nil)
-	return err
 }
 
 func (c *Client) RemoveVideoLibraryBlockedReferrer(libraryID int64, hostname string) error {
 	opts := map[string]string{
 		"Hostname": hostname,
 	}
-	req, err := c.newRequest("POST", fmt.Sprintf("/videolibrary/%v/removeBlockedReferrer", libraryID), "", opts)
-	if err != nil {
-		return err
-	}
-
-	_, err = c.do(req, nil)
-	return err
+	return c.doRequest("POST", fmt.Sprintf("/videolibrary/%v/removeBlockedReferrer", libraryID), "", opts, nil)
 }

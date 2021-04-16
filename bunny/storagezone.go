@@ -40,29 +40,17 @@ type StorageZone struct {
 	ReadOnlyPassword   string
 }
 
-func (c *Client) ListStorageZones() ([]StorageZone, error) {
-	req, err := c.newRequest("GET", "/storagezone", "", nil)
-	if err != nil {
-		return []StorageZone{}, err
-	}
-
+func (c *Client) ListStorageZones() (*[]StorageZone, error) {
 	var storageZones []StorageZone
-	_, err = c.do(req, &storageZones)
-	return storageZones, err
+	return &storageZones, c.doRequest("GET", "/storagezone", "", nil, &storageZones)
 }
 
-func (c *Client) GetStorageZone(zoneID int64) (StorageZone, error) {
-	req, err := c.newRequest("GET", fmt.Sprintf("/storagezone/%v", zoneID), "", nil)
-	if err != nil {
-		return StorageZone{}, err
-	}
-
+func (c *Client) GetStorageZone(zoneID int64) (*StorageZone, error) {
 	var storageZone StorageZone
-	_, err = c.do(req, &storageZone)
-	return storageZone, err
+	return &storageZone, c.doRequest("GET", fmt.Sprintf("/storagezone/%v", zoneID), "", nil, &storageZone)
 }
 
-func (c *Client) AddStorageZone(originURL string, name string, region string, replicationRegions []string) (StorageZone, error) {
+func (c *Client) AddStorageZone(originURL string, name string, region string, replicationRegions []string) (*StorageZone, error) {
 	opts := map[string]interface{}{
 		"OriginUrl":          originURL,
 		"Name":               name,
@@ -70,14 +58,8 @@ func (c *Client) AddStorageZone(originURL string, name string, region string, re
 		"ReplicationRegions": replicationRegions,
 	}
 
-	req, err := c.newRequest("POST", "/storagezone", "", opts)
-	if err != nil {
-		return StorageZone{}, err
-	}
-
 	var storageZone StorageZone
-	_, err = c.do(req, &storageZone)
-	return storageZone, err
+	return &storageZone, c.doRequest("POST", "/storagezone", "", opts, &storageZone)
 }
 
 func (c *Client) UpdateStorageZone(zoneID int64, originURL string, replicationRegions []string) error {
@@ -86,47 +68,23 @@ func (c *Client) UpdateStorageZone(zoneID int64, originURL string, replicationRe
 		"ReplicationZones": replicationRegions, // sic
 	}
 
-	req, err := c.newRequest("POST", fmt.Sprintf("/storagezone/%v", zoneID), "", opts)
-	if err != nil {
-		return err
-	}
-
-	_, err = c.do(req, nil)
-	return err
+	return c.doRequest("POST", fmt.Sprintf("/storagezone/%v", zoneID), "", opts, nil)
 }
 
 func (c *Client) DeleteStorageZone(zoneID int64) error {
-	req, err := c.newRequest("DELETE", fmt.Sprintf("/storagezone/%v", zoneID), "", nil)
-	if err != nil {
-		return err
-	}
-
-	_, err = c.do(req, nil)
-	return err
+	return c.doRequest("DELETE", fmt.Sprintf("/storagezone/%v", zoneID), "", nil, nil)
 }
 
 func (c *Client) ResetStorageZonePassword(zoneID int64) error {
 	v := url.Values{}
 	v.Set("id", strconv.FormatInt(zoneID, 10))
 
-	req, err := c.newRequest("POST", "/storagezone/resetPassword", v.Encode(), nil)
-	if err != nil {
-		return err
-	}
-
-	_, err = c.do(req, nil)
-	return err
+	return c.doRequest("POST", "/storagezone/resetPassword", v.Encode(), nil, nil)
 }
 
 func (c *Client) ResetStorageZoneReadOnlyPassword(zoneID int64) error {
 	v := url.Values{}
 	v.Set("id", strconv.FormatInt(zoneID, 10))
 
-	req, err := c.newRequest("POST", "/storagezone/resetReadOnlyPassword", v.Encode(), nil)
-	if err != nil {
-		return err
-	}
-
-	_, err = c.do(req, nil)
-	return err
+	return c.doRequest("POST", "/storagezone/resetReadOnlyPassword", v.Encode(), nil, nil)
 }

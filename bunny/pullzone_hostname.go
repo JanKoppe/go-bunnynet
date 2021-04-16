@@ -33,26 +33,14 @@ func (c *Client) RemovePullZoneHostname(zoneID int64, hostname string) error {
 	opts := map[string]string{
 		"Hostname": hostname,
 	}
-	req, err := c.newRequest("DELETE", fmt.Sprintf("/pullzone/%v/removeHostname", zoneID), "", opts)
-	if err != nil {
-		return err
-	}
-
-	_, err = c.do(req, nil)
-	return err
+	return c.doRequest("DELETE", fmt.Sprintf("/pullzone/%v/removeHostname", zoneID), "", opts, nil)
 }
 
 func (c *Client) AddPullZoneHostname(zoneID int64, hostname string) error {
 	opts := map[string]string{
 		"Hostname": hostname,
 	}
-	req, err := c.newRequest("POST", fmt.Sprintf("/pullzone/%v/addHostname", zoneID), "", opts)
-	if err != nil {
-		return err
-	}
-
-	_, err = c.do(req, nil)
-	return err
+	return c.doRequest("POST", fmt.Sprintf("/pullzone/%v/addHostname", zoneID), "", opts, nil)
 }
 
 func (c *Client) SetPullZoneHostnameForceSSL(zoneID int64, hostname string, forceSSL bool) error {
@@ -60,11 +48,5 @@ func (c *Client) SetPullZoneHostnameForceSSL(zoneID int64, hostname string, forc
 		"Hostname": hostname,
 		"ForceSSL": forceSSL,
 	}
-	req, err := c.newRequest("POST", fmt.Sprintf("/pullzone/%v/setForceSSL", zoneID), "", opts)
-	if err != nil {
-		return err
-	}
-
-	_, err = c.do(req, nil)
-	return err
+	return c.doRequest("POST", fmt.Sprintf("/pullzone/%v/setForceSSL", zoneID), "", opts, nil)
 }

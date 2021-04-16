@@ -23,39 +23,73 @@ import (
 	"testing"
 )
 
-func TestPullZoneFreeCertificate(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode to avoid generating certificates.")
-	}
-
-	testHostname := "test.bunny.net"
-
+func TestReadVideoLibraries(t *testing.T) {
 	c, err := NewClient("")
-
 	if err != nil {
 		t.Errorf(err.Error())
 	}
 
-	// Create a fresh PullZone
-	pullZone, err := c.CreatePullZone("go-bunnynet-testcertificates", "https://bunny.net", 0, PZTPremium)
+	lib, err := c.AddVideoLibrary("go-bunnynet-testread", []string{"SYD"})
 	if err != nil {
 		t.Errorf(err.Error())
 	}
 
-	err = c.AddPullZoneHostname(pullZone.ID, testHostname)
+	videoLibraries, err := c.ListVideoLibraries()
 	if err != nil {
 		t.Errorf(err.Error())
 	}
 
-	err = c.LoadFreeCertificate(testHostname)
+	_, err = c.GetVideoLibrary((*videoLibraries)[0].ID)
 	if err != nil {
 		t.Errorf(err.Error())
 	}
 
-	// Cleanup
-	err = c.DeletePullZone(pullZone.ID)
+	err = c.DeleteVideoLibrary(lib.ID)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+}
+
+func TestCrudVideoLibrary(t *testing.T) {
+	c, err := NewClient("")
 	if err != nil {
 		t.Errorf(err.Error())
 	}
 
+	lib, err := c.AddVideoLibrary("go-bunnynet-test", []string{"SYD"})
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	lib.KeepOriginalFiles = false
+
+	lib, err = c.UpdateVideoLibrary((*lib))
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	err = c.AddVideoLibraryAllowedReferrer(lib.ID, "bunny.net")
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	err = c.RemoveVideoLibraryAllowedReferrer(lib.ID, "bunny.net")
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	err = c.AddVideoLibraryBlockedReferrer(lib.ID, "bunny.net")
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	err = c.RemoveVideoLibraryBlockedReferrer(lib.ID, "bunny.net")
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	err = c.DeleteVideoLibrary(lib.ID)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
 }

@@ -34,12 +34,12 @@ func TestReadStorageZones(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 
-	err = c.ResetStorageZonePassword(storageZones[0].ID)
+	err = c.ResetStorageZonePassword((*storageZones)[0].ID)
 	if err != nil {
 		t.Errorf(err.Error())
 	}
 
-	err = c.ResetStorageZoneReadOnlyPassword(storageZones[0].ID)
+	err = c.ResetStorageZoneReadOnlyPassword((*storageZones)[0].ID)
 	if err != nil {
 		t.Errorf(err.Error())
 	}

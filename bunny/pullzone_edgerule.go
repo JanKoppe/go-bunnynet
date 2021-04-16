@@ -119,12 +119,7 @@ func (c *Client) UpsertEdgeRule(zoneID int64, r EdgeRule) (string, error) {
 	}
 
 	// upsert EdgeRule
-	req, err := c.newRequest("POST", fmt.Sprintf("/pullzone/%v/edgerules/addOrUpdate", zoneID), "", r)
-	if err != nil {
-		return "", err
-	}
-
-	_, err = c.do(req, nil)
+	err = c.doRequest("POST", fmt.Sprintf("/pullzone/%v/edgerules/addOrUpdate", zoneID), "", r, nil)
 	if err != nil {
 		return "", err
 	}
@@ -147,14 +142,7 @@ func (c *Client) UpsertEdgeRule(zoneID int64, r EdgeRule) (string, error) {
 }
 
 func (c *Client) DeleteEdgeRule(zoneID int64, ruleID string) error {
-	req, err := c.newRequest("DELETE", fmt.Sprintf("/pullzone/%v/edgerules/%v", zoneID, ruleID), "", nil)
-
-	if err != nil {
-		return err
-	}
-
-	_, err = c.do(req, nil)
-	return err
+	return c.doRequest("DELETE", fmt.Sprintf("/pullzone/%v/edgerules/%v", zoneID, ruleID), "", nil, nil)
 }
 
 // This API call seems to be incomplete. This function is effectively a stub, and doesn't actually do anything.

@@ -63,42 +63,22 @@ type BillingSummary struct {
 	PullZones []BillingSummaryReport
 }
 
-func (c *Client) GetBillingDetails() (BillingDetails, error) {
-
-	req, err := c.newRequest("GET", "/billing", "", nil)
-	if err != nil {
-		return BillingDetails{}, err
-	}
-
+func (c *Client) GetBillingDetails() (*BillingDetails, error) {
 	var details BillingDetails
-	_, err = c.do(req, &details)
-	return details, err
+	return &details, c.doRequest("GET", "/billing", "", nil, &details)
 }
 
-func (c *Client) GetBillingSummary() (BillingSummary, error) {
-
-	req, err := c.newRequest("GET", "/billing/summary", "", nil)
-	if err != nil {
-		return BillingSummary{}, err
-	}
-
+func (c *Client) GetBillingSummary() (*BillingSummary, error) {
 	var summary BillingSummary
-	_, err = c.do(req, &summary)
-	return summary, err
+	return &summary, c.doRequest("GET", "/billing/summary", "", nil, &summary)
 }
 
-func (c *Client) ApplyPromoCode(code string) (ErrorResponse, error) {
+func (c *Client) ApplyPromoCode(code string) (*ErrorResponse, error) {
 	// why is this a GET, bunny?
 	// why is a errorresponse returned for a 200?
 	v := url.Values{}
 	v.Set("CouponCode", code)
 
-	req, err := c.newRequest("GET", "/billing/applycode", v.Encode(), nil)
-	if err != nil {
-		return ErrorResponse{}, err
-	}
-
 	var msg ErrorResponse
-	_, err = c.do(req, &msg)
-	return msg, err
+	return &msg, c.doRequest("GET", "/billing/applycode", v.Encode(), nil, &msg)
 }

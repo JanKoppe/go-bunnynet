@@ -25,7 +25,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -49,16 +48,13 @@ func (r *ErrorResponse) Error() string {
 	return fmt.Sprintf("%v, ErrorKey: %v, Field: %v", r.Message, r.ErrorKey, r.Field)
 }
 
-func NewClient(key string) (Client, error) {
-	c := Client{}
-	h := &http.Client{Timeout: 60 * time.Second}
+func NewClient(key string) (*Client, error) {
 
 	if key == "" {
-		env := os.Getenv("BUNNYCDN_ACCESSKEY")
-		if env == "" {
-			return c, errors.New("required access key not provided")
+		if kenv := os.Getenv("BUNNYCDN_ACCESSKEY"); kenv == "" {
+			return nil, errors.New("required access key not provided")
 		} else {
-			key = env
+			key = kenv
 		}
 	}
 
@@ -70,12 +66,18 @@ func NewClient(key string) (Client, error) {
 
 	u, err := url.Parse(baseurl)
 	if err != nil {
-		return c, err
+		return nil, err
 	}
 
-	c.AccessKey = key
-	c.BaseURL = u
-	c.httpClient = h
+	h := &http.Client{
+		Timeout: 60 * time.Second,
+	}
+
+	c := &Client{
+		AccessKey:  key,
+		BaseURL:    u,
+		httpClient: h,
+	}
 
 	return c, nil
 }
@@ -119,75 +121,41 @@ func (c *Client) do(req *http.Request, v interface{}) (*http.Response, error) {
 
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return resp, err
-	}
-
-	if resp.StatusCode == 400 {
+	switch {
+	case resp.StatusCode >= 400:
 		msg := ErrorResponse{}
-
-		if len(body) < 1 {
-			return resp, errors.New("client error")
-		}
-
-		if err = json.Unmarshal(body, &msg); err != nil {
-			return resp, err
+		if err = json.NewDecoder(resp.Body).Decode(&msg); err != nil {
+			switch resp.StatusCode {
+			case 400:
+				return resp, errors.New("client error")
+			case 401:
+				return resp, errors.New("unauthorized")
+			case 404:
+				return resp, errors.New("not found")
+			case 500:
+				return resp, errors.New("server error")
+			}
 		}
 		return resp, &msg
-	}
-
-	if resp.StatusCode == 401 {
-		msg := ErrorResponse{}
-
-		if len(body) < 1 {
-			return resp, errors.New("unauthorized")
-		}
-
-		if err = json.Unmarshal(body, &msg); err != nil {
-			return resp, err
-		}
-		return resp, &msg
-	}
-
-	if resp.StatusCode == 404 {
-		msg := ErrorResponse{}
-
-		if len(body) < 1 {
-			return resp, errors.New("not found")
-		}
-
-		if err = json.Unmarshal(body, &msg); err != nil {
-			return resp, err
-		}
-		return resp, &msg
-	}
-
-	if resp.StatusCode == 500 {
-		msg := ErrorResponse{}
-
-		if len(body) < 1 {
-			return resp, errors.New("server error")
-		}
-
-		if err = json.Unmarshal(body, &msg); err != nil {
-			return resp, err
-		}
-		return resp, &msg
-	}
-
-	if resp.StatusCode == 200 || resp.StatusCode == 201 {
-
-		// TODO workaround for 200 responses without content
-		// return early without trying to unmarshal
-		if len(body) < 1 {
+	case resp.StatusCode == 200 || resp.StatusCode == 201:
+		err = json.NewDecoder(resp.Body).Decode(v)
+		if err == io.EOF { // some 201s don't return the created resource.
 			return resp, nil
-		}
-
-		if err = json.Unmarshal(body, v); err != nil {
+		} else if err != nil { // might be a malformed response or unfitting interface, pass error
 			return resp, err
 		}
+	default:
+		return resp, nil
+	}
+	return resp, nil
+}
+
+func (c *Client) doRequest(method, path string, rawquery string, body interface{}, v interface{}) error {
+	req, err := c.newRequest(method, path, rawquery, body)
+	if err != nil {
+		return err
 	}
 
-	return resp, err
+	_, err = c.do(req, v)
+	return err
 }

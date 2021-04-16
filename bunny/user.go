@@ -40,15 +40,7 @@ type User struct {
 	EmailVerified                  bool
 }
 
-func (c *Client) GetUserDetails() (User, error) {
-	req, err := c.newRequest("GET", "/user", "", nil)
-
-	if err != nil {
-		return User{}, err
-	}
-
+func (c *Client) GetUserDetails() (*User, error) {
 	var user User
-	_, err = c.do(req, &user)
-
-	return user, err
+	return &user, c.doRequest("GET", "/user", "", nil, &user)
 }

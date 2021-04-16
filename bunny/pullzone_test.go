@@ -36,7 +36,7 @@ func TestReadPullZones(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 
-	_, err = c.GetPullZone(pullZones[0].ID)
+	_, err = c.GetPullZone((*pullZones)[0].ID)
 
 	if err != nil {
 		t.Errorf(err.Error())
@@ -56,12 +56,42 @@ func TestCrudPullZone(t *testing.T) {
 
 	pullZone.OriginURL = "https://new.bunny.net"
 
-	err = c.UpdatePullZone(pullZone)
+	err = c.UpdatePullZone((*pullZone))
 	if err != nil {
 		t.Errorf(err.Error())
 	}
 
 	err = c.PurgePullZoneCache(pullZone.ID)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	err = c.AddPullZoneAllowedReferrer(pullZone.ID, "bunny.net")
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	err = c.RemovePullZoneAllowedReferrer(pullZone.ID, "bunny.net")
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	err = c.AddPullZoneBlockedReferrer(pullZone.ID, "bunny.net")
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	err = c.RemovePullZoneBlockedReferrer(pullZone.ID, "bunny.net")
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	err = c.AddPullZoneBlockedIP(pullZone.ID, "127.0.0.1")
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	err = c.RemovePullZoneBlockedIP(pullZone.ID, "127.0.0.1")
 	if err != nil {
 		t.Errorf(err.Error())
 	}

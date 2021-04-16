@@ -28,14 +28,7 @@ func (c *Client) LoadFreeCertificate(hostname string) error {
 	// why is this a GET, bunny?
 	v := url.Values{}
 	v.Set("hostname", hostname)
-
-	req, err := c.newRequest("GET", "/pullzone/loadFreeCertificate", v.Encode(), nil)
-	if err != nil {
-		return err
-	}
-
-	_, err = c.do(req, nil)
-	return err
+	return c.doRequest("GET", "/pullzone/loadFreeCertificate", v.Encode(), nil, nil)
 }
 
 func (c *Client) AddCustomCertificate(zoneID int64, hostname string, certificate string, key string) error {
@@ -44,26 +37,12 @@ func (c *Client) AddCustomCertificate(zoneID int64, hostname string, certificate
 		"Certificate":    certificate,
 		"CertificateKey": key,
 	}
-
-	req, err := c.newRequest("POST", fmt.Sprintf("/pullzone/%v/addCertificate", zoneID), "", opts)
-	if err != nil {
-		return err
-	}
-
-	_, err = c.do(req, nil)
-	return err
+	return c.doRequest("POST", fmt.Sprintf("/pullzone/%v/addCertificate", zoneID), "", opts, nil)
 }
 
 func (c *Client) DeleteCustomCertificate(zoneID int64, hostname string) error {
 	opts := map[string]string{
 		"Hostname": hostname,
 	}
-
-	req, err := c.newRequest("DELETE", fmt.Sprintf("/pullzone/%v/removeCertificate", zoneID), "", opts)
-	if err != nil {
-		return err
-	}
-
-	_, err = c.do(req, nil)
-	return err
+	return c.doRequest("DELETE", fmt.Sprintf("/pullzone/%v/removeCertificate", zoneID), "", opts, nil)
 }

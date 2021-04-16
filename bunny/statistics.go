@@ -42,7 +42,7 @@ type Statistics struct {
 	Error5xxChart                          map[string]float32
 }
 
-func (c *Client) GetStatistics(dateFrom BunnyTime, dateTo BunnyTime, zoneID int64, serverZoneID int64, loadErrors bool, hourly bool) (Statistics, error) {
+func (c *Client) GetStatistics(dateFrom BunnyTime, dateTo BunnyTime, zoneID int64, serverZoneID int64, loadErrors bool, hourly bool) (*Statistics, error) {
 
 	v := url.Values{}
 
@@ -70,12 +70,6 @@ func (c *Client) GetStatistics(dateFrom BunnyTime, dateTo BunnyTime, zoneID int6
 		v.Set("hourly", "true")
 	}
 
-	req, err := c.newRequest("GET", "/statistics", v.Encode(), nil)
-	if err != nil {
-		return Statistics{}, err
-	}
-
 	var stats Statistics
-	_, err = c.do(req, &stats)
-	return stats, err
+	return &stats, c.doRequest("GET", "/statistics", v.Encode(), nil, &stats)
 }

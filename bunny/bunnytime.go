@@ -45,6 +45,11 @@ func (bt *BunnyTime) UnmarshalJSON(b []byte) (err error) {
 		bt.Time = time.Time{}
 		return
 	}
+	// for some reason, sometimes responses are RFC3399, sometimes not.
+	// I don't know, who needs standards anyways, amirite?
+	if strings.HasSuffix(s, "Z") {
+		s = s[:len(s)-1]
+	}
 	bt.Time, err = time.Parse(btLayout, s)
 	return
 }

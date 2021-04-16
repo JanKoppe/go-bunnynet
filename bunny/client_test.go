@@ -52,5 +52,5 @@ func PrettyPrint(v interface{}) {
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
-	fmt.Printf(string(resJSON))
+	fmt.Println(string(resJSON))
 }

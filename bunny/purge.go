@@ -25,13 +25,7 @@ import (
 )
 
 func (c *Client) PurgePullZoneCache(zoneID int64) error {
-	req, err := c.newRequest("POST", fmt.Sprintf("/pullzone/%v/purgeCache", zoneID), "", nil)
-	if err != nil {
-		return err
-	}
-
-	_, err = c.do(req, nil)
-	return err
+	return c.doRequest("POST", fmt.Sprintf("/pullzone/%v/purgeCache", zoneID), "", nil, nil)
 }
 
 func (c *Client) PurgeURL(purgeURL string, headerName string, headerValue string) error {
@@ -45,11 +39,5 @@ func (c *Client) PurgeURL(purgeURL string, headerName string, headerValue string
 		v.Set("headerValue", headerValue)
 	}
 
-	req, err := c.newRequest("GET", "/purge", v.Encode(), nil)
-	if err != nil {
-		return err
-	}
-
-	_, err = c.do(req, nil)
-	return err
+	return c.doRequest("GET", "/purge", v.Encode(), nil, nil)
 }

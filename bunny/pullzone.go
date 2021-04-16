@@ -95,29 +95,17 @@ type PullZone struct {
 	VideoLibraryID                       int64 `json:"VideoLibraryId,omitempty"`
 }
 
-func (c *Client) ListPullZones() ([]PullZone, error) {
-	req, err := c.newRequest("GET", "/pullzone", "", nil)
-	if err != nil {
-		return []PullZone{}, err
-	}
-
+func (c *Client) ListPullZones() (*[]PullZone, error) {
 	var pullZones []PullZone
-	_, err = c.do(req, &pullZones)
-	return pullZones, err
+	return &pullZones, c.doRequest("GET", "/pullzone", "", nil, &pullZones)
 }
 
-func (c *Client) GetPullZone(zoneID int64) (PullZone, error) {
-	req, err := c.newRequest("GET", fmt.Sprintf("/pullzone/%v", zoneID), "", nil)
-	if err != nil {
-		return PullZone{}, err
-	}
-
+func (c *Client) GetPullZone(zoneID int64) (*PullZone, error) {
 	var pullZone PullZone
-	_, err = c.do(req, &pullZone)
-	return pullZone, err
+	return &pullZone, c.doRequest("GET", fmt.Sprintf("/pullzone/%v", zoneID), "", nil, &pullZone)
 }
 
-func (c *Client) CreatePullZone(name string, origin string, storageZoneID int64, pzt PullZoneType) (PullZone, error) {
+func (c *Client) CreatePullZone(name string, origin string, storageZoneID int64, pzt PullZoneType) (*PullZone, error) {
 	opts := map[string]interface{}{
 		"Name":          name,
 		"OriginUrl":     origin,
@@ -125,25 +113,12 @@ func (c *Client) CreatePullZone(name string, origin string, storageZoneID int64,
 		"Type":          pzt,
 	}
 
-	req, err := c.newRequest("POST", "/pullzone", "", opts)
-	if err != nil {
-		return PullZone{}, err
-	}
-
 	var pullZone PullZone
-	_, err = c.do(req, &pullZone)
-
-	return pullZone, err
+	return &pullZone, c.doRequest("POST", "/pullzone", "", opts, &pullZone)
 }
 
 func (c *Client) DeletePullZone(zoneID int64) error {
-	req, err := c.newRequest("DELETE", fmt.Sprintf("/pullzone/%v", zoneID), "", nil)
-	if err != nil {
-		return err
-	}
-
-	_, err = c.do(req, nil)
-	return err
+	return c.doRequest("DELETE", fmt.Sprintf("/pullzone/%v", zoneID), "", nil, nil)
 }
 
 func (c *Client) UpdatePullZone(pz PullZone) error {
@@ -154,99 +129,51 @@ func (c *Client) UpdatePullZone(pz PullZone) error {
 	pz.MonthlyBandwidthUsed = 0
 	pz.MonthlyCharges = 0.0
 
-	req, err := c.newRequest("POST", fmt.Sprintf("/pullzone/%v", pzID), "", pz)
-	if err != nil {
-		return err
-	}
-
-	_, err = c.do(req, nil)
-	return err
+	return c.doRequest("POST", fmt.Sprintf("/pullzone/%v", pzID), "", pz, nil)
 }
 
 func (c *Client) ResetPullZoneToken(zoneID int64) error {
-	req, err := c.newRequest("POST", fmt.Sprintf("/pullzone/%v/resetSecurityKey", zoneID), "", nil)
-	if err != nil {
-		return err
-	}
-
-	_, err = c.do(req, nil)
-	return err
+	return c.doRequest("POST", fmt.Sprintf("/pullzone/%v/resetSecurityKey", zoneID), "", nil, nil)
 }
 
 func (c *Client) AddPullZoneAllowedReferrer(zoneID int64, hostname string) error {
 	opts := map[string]string{
 		"Hostname": hostname,
 	}
-	req, err := c.newRequest("POST", fmt.Sprintf("/pullzone/%v/addAllowedReferrer", zoneID), "", opts)
-	if err != nil {
-		return err
-	}
-
-	_, err = c.do(req, nil)
-	return err
+	return c.doRequest("POST", fmt.Sprintf("/pullzone/%v/addAllowedReferrer", zoneID), "", opts, nil)
 }
 
 func (c *Client) RemovePullZoneAllowedReferrer(zoneID int64, hostname string) error {
 	opts := map[string]string{
 		"Hostname": hostname,
 	}
-	req, err := c.newRequest("POST", fmt.Sprintf("/pullzone/%v/removeAllowedReferrer", zoneID), "", opts)
-	if err != nil {
-		return err
-	}
-
-	_, err = c.do(req, nil)
-	return err
+	return c.doRequest("POST", fmt.Sprintf("/pullzone/%v/removeAllowedReferrer", zoneID), "", opts, nil)
 }
 
 func (c *Client) AddPullZoneBlockedReferrer(zoneID int64, hostname string) error {
 	opts := map[string]string{
 		"Hostname": hostname,
 	}
-	req, err := c.newRequest("POST", fmt.Sprintf("/pullzone/%v/addBlockedReferrer", zoneID), "", opts)
-	if err != nil {
-		return err
-	}
-
-	_, err = c.do(req, nil)
-	return err
+	return c.doRequest("POST", fmt.Sprintf("/pullzone/%v/addBlockedReferrer", zoneID), "", opts, nil)
 }
 
 func (c *Client) RemovePullZoneBlockedReferrer(zoneID int64, hostname string) error {
 	opts := map[string]string{
 		"Hostname": hostname,
 	}
-	req, err := c.newRequest("POST", fmt.Sprintf("/pullzone/%v/removeBlockedReferrer", zoneID), "", opts)
-	if err != nil {
-		return err
-	}
-
-	_, err = c.do(req, nil)
-	return err
+	return c.doRequest("POST", fmt.Sprintf("/pullzone/%v/removeBlockedReferrer", zoneID), "", opts, nil)
 }
 
 func (c *Client) AddPullZoneBlockedIP(zoneID int64, blockedIP string) error {
 	opts := map[string]string{
 		"BlockedIp": blockedIP,
 	}
-	req, err := c.newRequest("POST", fmt.Sprintf("/pullzone/%v/addBlockedIp", zoneID), "", opts)
-	if err != nil {
-		return err
-	}
-
-	_, err = c.do(req, nil)
-	return err
+	return c.doRequest("POST", fmt.Sprintf("/pullzone/%v/addBlockedIp", zoneID), "", opts, nil)
 }
 
 func (c *Client) RemovePullZoneBlockedIP(zoneID int64, blockedIP string) error {
 	opts := map[string]string{
 		"BlockedIp": blockedIP,
 	}
-	req, err := c.newRequest("POST", fmt.Sprintf("/pullzone/%v/removeBlockedIp", zoneID), "", opts)
-	if err != nil {
-		return err
-	}
-
-	_, err = c.do(req, nil)
-	return err
+	return c.doRequest("POST", fmt.Sprintf("/pullzone/%v/removeBlockedIp", zoneID), "", opts, nil)
 }
