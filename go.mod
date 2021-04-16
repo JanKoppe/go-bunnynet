@@ -1,3 +1,3 @@
-module github.com/JanKoppe/go-bunnynet
+module github.com/jankoppe/go-bunnynet
 
 go 1.15
